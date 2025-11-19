@@ -15,7 +15,7 @@ services:
       - NODE_ENV=${NODE_ENV:-production}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4096/doc"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4096/doc"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -41,7 +41,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/chat"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -63,7 +63,7 @@ services:
       - PORT=3000
       - HOSTNAME=0.0.0.0
       - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=http://opencode-next-api:3000
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
     command: sh -c "npm install && npm run dev"
     depends_on:
       opencode-next-api:

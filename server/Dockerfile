@@ -31,4 +31,4 @@ RUN mkdir -p /home/opencode/.config/opencode && \
     echo '{"$schema":"https://opencode.ai/config.json","model":"opencode/big-pickle"}' > /home/opencode/.config/opencode/opencode.json
 
 # Start the OpenCode server
-CMD ["/bin/sh", "-c", "/usr/local/lib/node_modules/opencode-ai/node_modules/opencode-linux-x64-musl/bin/opencode serve --port ${PORT} --hostname ${HOSTNAME}"]
+CMD ["/bin/sh", "-c", "/usr/local/lib/node_modules/opencode-ai/node_modules/opencode-linux-x64-musl/bin/opencode serve --port ${PORT:-4096} --hostname 0.0.0.0"]
