@@ -9,6 +9,17 @@ const client = createOpencodeClient({
 // Store session ID (in production, this should be per-user)
 let sessionId: string | null = null;
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { message } = await request.json();
@@ -16,7 +27,12 @@ export async function POST(request: NextRequest) {
     if (!message) {
       return NextResponse.json(
         { error: "Message is required" },
-        { status: 400 }
+        {
+          status: 400,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
       );
     }
 
@@ -49,12 +65,24 @@ export async function POST(request: NextRequest) {
       .map((part) => part.text)
       .join("");
 
-    return NextResponse.json({ response: textContent });
+    return NextResponse.json(
+      { response: textContent },
+      {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error communicating with OpenCode server:", error);
     return NextResponse.json(
       { error: "Failed to communicate with OpenCode server" },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
     );
   }
 }
