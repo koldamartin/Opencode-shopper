@@ -29,7 +29,7 @@ variable "server_cpu" {
 variable "server_memory" {
    description = "Memory allocation for OpenCode server - optimized for free tier"
    type        = string
-   default     = "256Mi"
+   default     = "512Mi"
 }
 
 variable "next_api_cpu" {

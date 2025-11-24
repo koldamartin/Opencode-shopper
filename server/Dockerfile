@@ -8,16 +8,16 @@ WORKDIR /app
 RUN npm install -g opencode-ai
 
 # Set environment variables
-ENV PORT=4096
+# Note: PORT will be injected by Cloud Run (default 8080), do not hardcode
 ENV HOSTNAME=0.0.0.0
 ENV NODE_ENV=production
 
-# Expose the default OpenCode server port
-EXPOSE 4096
+# Expose the default OpenCode server port (8080 for Cloud Run)
+EXPOSE 8080
 
 # Health check to ensure the server is running
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=5 \
-  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:4096/doc || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:${PORT:-8080}/doc || exit 1
 
 # Create a non-root user for security
 RUN addgroup -g 1001 -S opencode && \
@@ -31,4 +31,4 @@ RUN mkdir -p /home/opencode/.config/opencode && \
     echo '{"$schema":"https://opencode.ai/config.json","model":"opencode/big-pickle"}' > /home/opencode/.config/opencode/opencode.json
 
 # Start the OpenCode server
-CMD ["/bin/sh", "-c", "/usr/local/lib/node_modules/opencode-ai/node_modules/opencode-linux-x64-musl/bin/opencode serve --port ${PORT:-4096} --hostname 0.0.0.0"]
+CMD ["/bin/sh", "-c", "/usr/local/lib/node_modules/opencode-ai/node_modules/opencode-linux-x64-musl/bin/opencode serve --port ${PORT:-8080} --hostname 0.0.0.0"]

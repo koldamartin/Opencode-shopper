@@ -3,11 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Create the OpenCode client connecting to the existing server
 const client = createOpencodeClient({
-  baseUrl: process.env.OPENCODE_URL || "https://strejda.onrender.com",
+  baseUrl: process.env.OPENCODE_URL || "http://localhost:8080",
 });
-
-// Store session ID (in production, this should be per-user)
-let sessionId: string | null = null;
 
 export async function OPTIONS() {
   return new NextResponse(null, {
@@ -22,7 +19,8 @@ export async function OPTIONS() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { message } = await request.json();
+    const body = await request.json();
+    const { message, sessionId: clientSessionId } = body;
 
     if (!message) {
       return NextResponse.json(
@@ -37,6 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create session if it doesn't exist
+    let sessionId = clientSessionId;
     if (!sessionId) {
       const session = await client.session.create({
         body: {},
@@ -55,18 +54,22 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (!response.data) {
-      throw new Error("Failed to get response from server");
-    }
+     if (!response.data) {
+       throw new Error("Failed to get response from server");
+     }
 
-    // Extract text content from response parts
-    const textContent = response.data.parts
-      .filter((part) => part.type === "text")
-      .map((part) => part.text)
-      .join("");
+     // Extract text content from response parts
+     if (!response.data.parts || !Array.isArray(response.data.parts)) {
+       throw new Error("Invalid response format: no parts array");
+     }
+
+     const textContent = response.data.parts
+       .filter((part) => part.type === "text")
+       .map((part) => part.text)
+       .join("");
 
     return NextResponse.json(
-      { response: textContent },
+      { response: textContent, sessionId },
       {
         headers: {
           "Access-Control-Allow-Origin": "*",

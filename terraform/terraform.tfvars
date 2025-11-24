@@ -2,10 +2,10 @@
 project_id = "opencode-shopper"
 region     = "us-central1"
 
-# Docker Images (update after building and pushing to Artifact Registry)
+# Docker Images (always uses 'latest' tag - automatically picks up new builds)
 # Format: REGION-docker.pkg.dev/PROJECT_ID/REPO_NAME/IMAGE_NAME:TAG
-server_image   = "us-central1-docker.pkg.dev/opencode-shopper/strejda-repo/server:v1"
-next_api_image = "us-central1-docker.pkg.dev/opencode-shopper/strejda-repo/next-api:v1"
+server_image   = "us-central1-docker.pkg.dev/opencode-shopper/strejda-repo/server:latest"
+next_api_image = "us-central1-docker.pkg.dev/opencode-shopper/strejda-repo/next-api:latest"
 
 # Resource Allocation (optional - defaults are set in variables.tf)
 # server_cpu       = "1000m"  # 1 vCPU
