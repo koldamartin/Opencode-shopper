@@ -9,7 +9,7 @@ This application is split into three separate services:
 ### Server: `server/`
 - **Technology**: OpenCode server
 - **Deployment**: Docker container
-- **Purpose**: Core AI chat server that processes messages
+- **Purpose**: Core AI chat server that processes messages, AI agent configured by json.
 - **Dependencies**: OpenCode server dependencies
 
 ### Backend: `opencode-next-api/`
@@ -17,7 +17,6 @@ This application is split into three separate services:
 - **Deployment**: Docker container
 - **Purpose**: Provides `/api/chat` endpoint that proxies requests to the OpenCode server
 - **Dependencies**: `@opencode-ai/sdk`, `next`
-- **Note**: This service makes API calls to the OpenCode server at `https://strejda.onrender.com`
 
 ### Frontend: `front-end-ui/`
 - **Technology**: Next.js React application
@@ -25,82 +24,6 @@ This application is split into three separate services:
 - **Purpose**: User interface for chat application
 - **Dependencies**: `next`, `react`, `react-dom`, `tailwindcss`
 
-## Development Setup
-
-### Server Development
-```bash
-cd server
-# Follow the server's README for setup instructions
-# The server should be running at https://strejda.onrender.com or your local instance
-```
-
-### Backend Development
-```bash
-cd opencode-next-api
-npm install
-npm run dev
-```
-The API will be available at `http://localhost:3000/api/chat`
-
-### Frontend Development
-```bash
-cd front-end-ui
-npm install
-cp .env.example .env.local
-# Edit .env.local to set NEXT_PUBLIC_API_URL=http://localhost:3000
-npm run dev
-```
-The frontend will be available at `http://localhost:3001`
-
-## Deployment
-
-### Server (Docker)
-```bash
-cd server
-docker-compose up -d
-# Or follow the server's deployment instructions
-```
-
-### Backend (Docker)
-```bash
-cd opencode-next-api
-docker build -t opencode-next-api .
-docker run -p 3000:3000 opencode-next-api
-```
-
-### Frontend (Netlify)
-1. Connect the `front-end-ui` directory to Netlify
-2. Set environment variable `NEXT_PUBLIC_API_URL` to your deployed backend URL
-3. Deploy - Netlify will automatically build and deploy the static site
-
-## Environment Variables
-
-### Server
-Refer to the server's documentation for required environment variables.
-
-### Backend
-No required environment variables for basic functionality.
-- Note: The backend is configured to connect to `https://strejda.onrender.com` by default in `opencode-next-api/app/api/chat/route.ts:6`
-
-### Frontend
-- `NEXT_PUBLIC_API_URL`: URL of the deployed backend API (e.g., `https://your-backend-url.com`)
-
-## API Endpoint
-
-### POST /api/chat
-Request body:
-```json
-{
-  "message": "Your message here"
-}
-```
-
-Response:
-```json
-{
-  "response": "AI response here"
-}
-```
 
 ## Service Dependencies
 
@@ -112,6 +35,32 @@ Response:
 
 The backend API (`opencode-next-api/app/api/chat/route.ts`) makes HTTP calls to the OpenCode server, so the server must be accessible at the configured URL.
 
-## Original Project Structure
+## Local Development
 
-This was originally a single Next.js application that has been separated into three services for better scalability and independent deployment capabilities.
+For local development, you can use the `docker-compose.yml` file to build and run all the necessary services. This is the recommended way to set up your development environment.
+
+To get started, run:
+```bash
+docker-compose up --build
+```
+The frontend will be accessible at http://localhost:3001.
+
+## Production Deployment
+
+For production, the `terraform/` directory contains all the necessary infrastructure-as-code to deploy the backend services to Google Cloud Platform. The Terraform scripts will provision all the required resources, such as virtual machines, load balancers, and networking configurations.
+
+The static web frontend is not managed by Terraform and must be manually configured and deployed on Netlify.
+
+### Deployment Script (`deploy.sh`)
+
+The `deploy.sh` script automates the entire backend deployment process. It performs the following steps:
+
+1.  **Builds Docker Images**: Creates Docker images for the `server` and `opencode-next-api` services.
+2.  **Pushes to Artifact Registry**: Pushes the built Docker images to Google Cloud Artifact Registry.
+3.  **Runs Terraform Apply**: Executes `terraform apply` using the Terraform configurations in the `terraform/` directory, deploying the services to Google Cloud Run.
+
+To run the deployment, simply execute:
+```bash
+./deploy.sh
+```
+Make sure you have `docker`, `gcloud`, and `terraform` installed and configured.
