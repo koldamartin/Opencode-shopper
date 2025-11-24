@@ -5,10 +5,10 @@ export async function GET() {
   try {
     const startTime = Date.now();
 
-    // Create the OpenCode client
-    const client = createOpencodeClient({
-      baseUrl: process.env.OPENCODE_URL || "https://strejda.onrender.com",
-    });
+     // Create the OpenCode client
+     const client = createOpencodeClient({
+       baseUrl: process.env.OPENCODE_URL || "http://localhost:8080",
+     });
 
     // Test connection to the backend server
     // Using a simple session list request to verify connectivity

@@ -11,6 +11,7 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -30,13 +31,18 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ message: input, sessionId }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to get response');
+      }
+
+      // Store the session ID for future requests
+      if (data.sessionId) {
+        setSessionId(data.sessionId);
       }
 
       const aiMessage: Message = { role: 'assistant', content: data.response };
