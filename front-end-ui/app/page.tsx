@@ -17,6 +17,17 @@ type Message =
   | { role: 'user'; content: string }
   | { role: 'assistant'; content: ChatPayload };
 
+// Helper function to parse markdown bold syntax
+const parseMarkdownBold = (text: string) => {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+};
+
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -80,23 +91,25 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-100 dark:bg-zinc-900 p-4">
-      <div className="w-full max-w-2xl h-[600px] bg-white dark:bg-zinc-800 rounded-lg shadow-lg flex flex-col">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-zinc-50 via-blue-50 to-zinc-100 dark:from-zinc-950 dark:via-blue-950 dark:to-zinc-900 p-4">
+      <div className="w-full max-w-4xl h-[85vh] bg-white/80 dark:bg-zinc-800/90 backdrop-blur-sm rounded-2xl shadow-2xl border border-zinc-200/50 dark:border-zinc-700/50 flex flex-col">
         {/* Header */}
-        <div className="p-4 border-b border-zinc-200 dark:border-zinc-700">
-          <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+        <div className="p-6 border-b border-zinc-200/60 dark:border-zinc-700/60 bg-gradient-to-r from-blue-50 to-transparent dark:from-blue-950/30 dark:to-transparent">
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             OpenCode Chat
           </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+          <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
             Powered by Big Pickle
           </p>
         </div>
 
         {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {messages.length === 0 && (
-            <div className="text-center text-zinc-500 dark:text-zinc-400 mt-8">
-              Send a message to start chatting
+            <div className="text-center text-zinc-400 dark:text-zinc-500 mt-12">
+              <div className="text-6xl mb-4">💬</div>
+              <p className="text-lg font-medium">Send a message to start chatting</p>
+              <p className="text-sm mt-2">Ask me anything about products!</p>
             </div>
           )}
           {messages.map((message, index) => (
@@ -105,37 +118,57 @@ export default function Home() {
               className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                className={`max-w-[80%] rounded-2xl px-5 py-3 shadow-md ${
                   message.role === 'user'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100'
+                    ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
+                    : 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-600'
                 }`}
               >
                 {message.role === 'user' ? (
                   message.content
                 ) : (
-                  <div className="space-y-2">
-                    {/* output_text in blue */}
-                    <p className="text-blue-500">
-                      {message.content.output_text}
+                  <div className="space-y-4">
+                    {/* output_text in black with bold markdown support */}
+                    <p className="text-zinc-900 dark:text-zinc-100">
+                      {parseMarkdownBold(message.content.output_text)}
                     </p>
 
-                    {/* products in red, bold */}
+                    {/* products in horizontal card grid below output_text */}
                     {message.content.products && message.content.products.length > 0 && (
-                      <ul className="space-y-1">
-                        {message.content.products.map((product, i) => (
-                          <li key={i} className="text-red-600 font-bold">
-                            {product.name} – {product.price_czk} Kč
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                         {message.content.products.map((product, i) => (
+                          <div 
+                            key={i} 
+                            className="border border-zinc-200 dark:border-zinc-600 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white dark:bg-zinc-50 p-4 flex flex-col"
+                          >
+                            {/* Product Image - centered at top */}
                             {product.image_link && (
-                              <img 
-                                src={product.image_link} 
-                                alt={product.name} 
-                                className="mt-1 max-w-xs rounded"
-                              />
+                              <div className="flex justify-center mb-3">
+                                <img 
+                                  src={product.image_link} 
+                                  alt={product.name} 
+                                  className="w-full h-auto object-contain rounded"
+                                />
+                              </div>
                             )}
-                          </li>
+                            
+                            {/* Product Name - blue, clickable */}
+                            <a 
+                              href={product.image_link} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline cursor-pointer mb-2 text-sm font-medium"
+                            >
+                              {product.name}
+                            </a>
+                            
+                            {/* Price - red/pink, right-aligned */}
+                            <p className="text-right text-pink-600 font-medium text-sm mt-auto">
+                              {product.price_czk} Kč
+                            </p>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     )}
                   </div>
                 )}
@@ -144,29 +177,33 @@ export default function Home() {
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-zinc-200 dark:bg-zinc-700 rounded-lg px-4 py-2">
-                <span className="text-zinc-500">...</span>
+              <div className="bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 rounded-2xl px-5 py-3 shadow-md">
+                <div className="flex gap-1">
+                  <span className="animate-bounce text-blue-500">●</span>
+                  <span className="animate-bounce text-blue-500" style={{animationDelay: '0.1s'}}>●</span>
+                  <span className="animate-bounce text-blue-500" style={{animationDelay: '0.2s'}}>●</span>
+                </div>
               </div>
             </div>
           )}
         </div>
 
         {/* Input Area */}
-        <div className="p-4 border-t border-zinc-200 dark:border-zinc-700">
-          <div className="flex gap-2">
+        <div className="p-6 border-t border-zinc-200/60 dark:border-zinc-700/60 bg-zinc-50/50 dark:bg-zinc-900/30">
+          <div className="flex gap-3">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your message..."
-              className="flex-1 px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-700 dark:text-zinc-100"
+              className="flex-1 px-5 py-3 border border-zinc-300 dark:border-zinc-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-zinc-700 dark:text-zinc-100 shadow-sm transition-all"
               disabled={isLoading}
             />
             <button
               onClick={handleSend}
               disabled={isLoading || !input.trim()}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-zinc-300 disabled:cursor-not-allowed transition-colors"
+              className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 disabled:from-zinc-300 disabled:to-zinc-300 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg font-medium"
             >
               Send
             </button>
