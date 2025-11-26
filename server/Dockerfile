@@ -26,9 +26,11 @@ RUN addgroup -g 1001 -S opencode && \
 # Switch to non-root user
 USER opencode
 
-# Create OpenCode config directory and config file
-RUN mkdir -p /home/opencode/.config/opencode && \
-    echo '{"$schema":"https://opencode.ai/config.json","model":"opencode/big-pickle"}' > /home/opencode/.config/opencode/opencode.json
+# Ensure OpenCode config directory exists
+RUN mkdir -p /home/opencode/.config/opencode
+
+# Copy OpenCode config into the image
+COPY opencode.json /home/opencode/.config/opencode/opencode.json
 
 # Start the OpenCode server
 CMD ["/bin/sh", "-c", "/usr/local/lib/node_modules/opencode-ai/node_modules/opencode-linux-x64-musl/bin/opencode serve --port ${PORT:-8080} --hostname 0.0.0.0"]
