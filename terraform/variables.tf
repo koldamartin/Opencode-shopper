@@ -49,3 +49,15 @@ variable "allow_public_access" {
   type        = bool
   default     = true
 }
+
+variable "openai_api_key" {
+  description = "OpenAI API Key for the OpenCode server"
+  type        = string
+  sensitive   = true
+}
+
+variable "opencode_model" {
+  description = "The AI model to use (e.g., openai/gpt-4o)"
+  type        = string
+  default     = "openai/gpt-4o"
+}

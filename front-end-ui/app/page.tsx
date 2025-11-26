@@ -2,10 +2,20 @@
 
 import { useState } from 'react';
 
-type Message = {
-  role: 'user' | 'assistant';
-  content: string;
+type Product = {
+  name: string;
+  price_czk: number;
+  image_link: string;
 };
+
+type ChatPayload = {
+  output_text: string;
+  products: Product[] | null;
+};
+
+type Message =
+  | { role: 'user'; content: string }
+  | { role: 'assistant'; content: ChatPayload };
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -46,14 +56,17 @@ export default function Home() {
       }
 
       const aiMessage: Message = { role: 'assistant', content: data.response };
-      setMessages(prev => [...prev, aiMessage]);
+      setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage: Message = {
         role: 'assistant',
-        content: 'Sorry, there was an error processing your message.'
+        content: {
+          output_text: 'Sorry, there was an error processing your message.',
+          products: null
+        }
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -98,7 +111,34 @@ export default function Home() {
                     : 'bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100'
                 }`}
               >
-                {message.content}
+                {message.role === 'user' ? (
+                  message.content
+                ) : (
+                  <div className="space-y-2">
+                    {/* output_text in blue */}
+                    <p className="text-blue-500">
+                      {message.content.output_text}
+                    </p>
+
+                    {/* products in red, bold */}
+                    {message.content.products && message.content.products.length > 0 && (
+                      <ul className="space-y-1">
+                        {message.content.products.map((product, i) => (
+                          <li key={i} className="text-red-600 font-bold">
+                            {product.name} – {product.price_czk} Kč
+                            {product.image_link && (
+                              <img 
+                                src={product.image_link} 
+                                alt={product.name} 
+                                className="mt-1 max-w-xs rounded"
+                              />
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           ))}

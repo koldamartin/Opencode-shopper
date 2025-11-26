@@ -48,6 +48,16 @@ resource "google_cloud_run_service" "opencode_server" {
           value = "0.0.0.0"
         }
         
+        env {
+          name  = "OPENCODE_MODEL"
+          value = var.opencode_model
+        }
+        
+        env {
+          name  = "OPENAI_API_KEY"
+          value = var.openai_api_key
+        }
+        
         # Resource limits and requests - optimized for free tier
         resources {
           limits = {

@@ -74,14 +74,22 @@ docker push ${REPO}/next-api:v1
 
 ### 4. Update terraform.tfvars
 
-Edit `terraform/terraform.tfvars` with your image tags:
+Edit `terraform/terraform.tfvars` with your image tags and OpenAI API key:
 
 ```hcl
 project_id     = "opencode-shopper"
 region         = "us-central1"
 server_image   = "us-central1-docker.pkg.dev/opencode-shopper/strejda-repo/server:v1"
 next_api_image = "us-central1-docker.pkg.dev/opencode-shopper/strejda-repo/next-api:v1"
+
+# REQUIRED: Your OpenAI API key
+openai_api_key = "sk-proj-your-actual-openai-api-key-here"
+
+# Optional: Customize the model (defaults to openai/gpt-4o)
+opencode_model = "openai/gpt-4o"
 ```
+
+**Important**: Never commit `terraform.tfvars` to version control as it contains sensitive API keys!
 
 ### 5. Deploy to Cloud Run
 
@@ -171,10 +179,12 @@ gcloud billing projects describe opencode-shopper
 | `region` | GCP Region | `us-central1` |
 | `server_image` | Docker image for server | Required |
 | `next_api_image` | Docker image for API | Required |
-| `server_cpu` | Server CPU allocation | `1000m` |
+| `openai_api_key` | OpenAI API key | Required (sensitive) |
+| `opencode_model` | AI model to use | `openai/gpt-4o` |
+| `server_cpu` | Server CPU allocation | `256m` |
 | `server_memory` | Server memory allocation | `512Mi` |
-| `next_api_cpu` | API CPU allocation | `1000m` |
-| `next_api_memory` | API memory allocation | `512Mi` |
+| `next_api_cpu` | API CPU allocation | `256m` |
+| `next_api_memory` | API memory allocation | `256Mi` |
 | `allow_public_access` | Allow public access | `true` |
 
 ## Troubleshooting

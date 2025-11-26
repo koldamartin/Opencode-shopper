@@ -1,5 +1,6 @@
 import { createOpencodeClient } from "@opencode-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { ChatPayload, Product } from "./types";
 
 // Create the OpenCode client connecting to the existing server
 const client = createOpencodeClient({
@@ -64,12 +65,45 @@ export async function POST(request: NextRequest) {
      }
 
      const textContent = response.data.parts
-       .filter((part) => part.type === "text")
-       .map((part) => part.text)
+       .filter((part: any) => part.type === "text")
+       .map((part: any) => part.text)
        .join("");
 
+     // Parse the JSON response from the LLM
+     let parsed: ChatPayload;
+     try {
+       parsed = JSON.parse(textContent);
+     } catch (error) {
+       console.error("LLM did not return valid JSON:", error);
+       console.error("Raw text content:", textContent);
+       throw new Error("LLM did not return valid JSON");
+     }
+
+     // Validate the schema
+     if (
+       typeof parsed.output_text !== "string" ||
+       !("products" in parsed) ||
+       !(
+         parsed.products === null ||
+         (Array.isArray(parsed.products) &&
+           parsed.products.length <= 3 &&
+           parsed.products.every(
+             (p: Product) =>
+               typeof p.name === "string" &&
+               (typeof p.price_czk === "number" || typeof p.price_czk === "string") &&
+               typeof p.image_link === "string"
+           ))
+       )
+     ) {
+       console.error("LLM JSON schema validation failed");
+       console.error("Parsed object:", JSON.stringify(parsed, null, 2));
+       console.error("output_text type:", typeof parsed.output_text);
+       console.error("products value:", parsed.products);
+       throw new Error("LLM JSON does not match expected schema");
+     }
+
     return NextResponse.json(
-      { response: textContent, sessionId },
+      { response: parsed, sessionId },
       {
         headers: {
           "Access-Control-Allow-Origin": "*",
